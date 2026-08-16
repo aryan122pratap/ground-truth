@@ -16,6 +16,11 @@ class LLMError(RuntimeError):
     """Raised when the LLM fails to produce output matching the requested schema."""
 
 
+def load_prompt(name: str) -> str:
+    path = config.PROMPTS_DIR / f"{name}.md"
+    return path.read_text(encoding="utf-8")
+
+
 def _strip_fences(text: str) -> str:
     return _FENCE_RE.sub("", text.strip()).strip()
 
