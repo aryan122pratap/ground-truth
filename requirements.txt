@@ -1,0 +1,11 @@
+streamlit>=1.38
+langgraph>=0.2
+litellm>=1.48
+tavily-python>=0.5
+ddgs>=9.0
+diskcache>=5.6
+pydantic>=2.8
+pytest>=8.3
+python-dotenv>=1.0
+tenacity>=9.0
+plotly>=5.24
