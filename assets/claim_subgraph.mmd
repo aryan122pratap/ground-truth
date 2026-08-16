@@ -1,0 +1,21 @@
+---
+config:
+  flowchart:
+    curve: linear
+---
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	prosecute_node(prosecute_node)
+	defend_node(defend_node)
+	judge_node(judge_node)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> defend_node;
+	__start__ --> prosecute_node;
+	defend_node --> judge_node;
+	judge_node -.-> __end__;
+	judge_node -.-> defend_node;
+	judge_node -.-> prosecute_node;
+	prosecute_node --> judge_node;
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc
