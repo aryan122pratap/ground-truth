@@ -1,5 +1,3 @@
-import json
-
 from ground_truth.agents import extractor
 
 
