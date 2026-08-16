@@ -1,7 +1,9 @@
+import plotly.graph_objects as go
 import streamlit as st
 
-from ground_truth.graph import run_audit
-from ground_truth.render import render_annotated_html
+from ground_truth.graph import stream_audit
+from ground_truth.render import LABEL_COLORS, compute_summary, render_annotated_html
+from tests.fixtures.sample_texts import EXAMPLES
 
 st.set_page_config(page_title="Ground Truth", page_icon="🔎", layout="wide")
 
@@ -12,17 +14,38 @@ st.caption(
     "[GitHub](https://github.com/aryan122pratap/ground-truth)"
 )
 
-text = st.text_area(
+if "input_text" not in st.session_state:
+    st.session_state["input_text"] = ""
+
+st.text_area(
     "Paste text to audit",
     height=200,
     placeholder="Paste a news article, LinkedIn post, research abstract, or tweet thread...",
+    key="input_text",
 )
 
-run_clicked = st.button("Run audit", type="primary", disabled=not text.strip())
+st.caption("Try an example:")
+example_cols = st.columns(len(EXAMPLES))
+for col, (label, sample_text) in zip(example_cols, EXAMPLES):
+    if col.button(label, use_container_width=True):
+        st.session_state["input_text"] = sample_text
+        st.rerun()
+
+run_clicked = st.button(
+    "Run audit", type="primary", disabled=not st.session_state["input_text"].strip()
+)
 
 if run_clicked:
-    with st.spinner("Auditing claims — extracting, debating, and judging..."):
-        result = st.session_state["result"] = run_audit(text)
+    text = st.session_state["input_text"]
+    result = None
+    with st.status("Auditing claims...", expanded=True) as status:
+        for kind, payload in stream_audit(text):
+            if kind == "status":
+                status.write(payload)
+            elif kind == "result":
+                result = payload
+        status.update(label="Audit complete", state="complete", expanded=False)
+    st.session_state["result"] = result
 else:
     result = st.session_state.get("result")
 
@@ -34,6 +57,38 @@ if result is not None:
         "Teal = supported, amber = disputed, rose = contradicted, grey = unverifiable/opinion."
     )
     st.markdown(render_annotated_html(result), unsafe_allow_html=True)
+
+    st.divider()
+    st.subheader("Summary")
+    summary = compute_summary(result)
+    score_col, supported_col, disputed_col, contradicted_col, unverifiable_col = st.columns(5)
+    score = summary["overall_score"]
+    score_col.metric("Truthfulness score", f"{score:.0f}/100" if score is not None else "—")
+    supported_col.metric("Supported", summary["label_counts"]["supported"])
+    disputed_col.metric("Disputed", summary["label_counts"]["disputed"])
+    contradicted_col.metric("Contradicted", summary["label_counts"]["contradicted"])
+    unverifiable_col.metric("Unverifiable", summary["label_counts"]["unverifiable"])
+
+    if result.verdicts:
+        verdicts_sorted = sorted(result.verdicts, key=lambda v: v.confidence)
+        fig = go.Figure(
+            go.Bar(
+                x=[v.confidence for v in verdicts_sorted],
+                y=[v.claim_id for v in verdicts_sorted],
+                orientation="h",
+                marker_color=[LABEL_COLORS.get(v.label, "#6b7280") for v in verdicts_sorted],
+                text=[f"{v.confidence}" for v in verdicts_sorted],
+                textposition="outside",
+            )
+        )
+        fig.update_layout(
+            xaxis_title="Confidence (0-100)",
+            yaxis_title="Claim",
+            xaxis_range=[0, 100],
+            height=max(200, 60 + 40 * len(verdicts_sorted)),
+            margin=dict(l=10, r=10, t=10, b=10),
+        )
+        st.plotly_chart(fig, use_container_width=True)
 
     st.divider()
     st.subheader("Claim-by-claim verdicts")

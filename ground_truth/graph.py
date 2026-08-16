@@ -168,13 +168,50 @@ def get_graph():
     return _compiled_graph
 
 
-def run_audit(text: str) -> AuditResult:
+def stream_audit(text: str):
+    """Run the audit graph, yielding ('status', message) progress events as each
+    node completes, followed by a final ('result', AuditResult) event."""
     start = time.monotonic()
-    final_state = get_graph().invoke(
-        {"raw_text": text, "claims": [], "arguments": {}, "verdicts": [], "errors": []}
-    )
+    total_checkable = 0
+    completed = 0
+    final_state = None
+
+    for mode, chunk in get_graph().stream(
+        {"raw_text": text, "claims": [], "arguments": {}, "verdicts": [], "errors": []},
+        stream_mode=["updates", "values"],
+    ):
+        if mode == "values":
+            final_state = chunk
+            continue
+        for node_name, update in chunk.items():
+            update = update or {}
+            if node_name == "extractor":
+                claims = update.get("claims", [])
+                total_checkable = sum(1 for c in claims if c.checkable)
+                if total_checkable:
+                    yield (
+                        "status",
+                        f"Extracted {len(claims)} claim(s) — auditing {total_checkable} checkable...",
+                    )
+                else:
+                    yield ("status", f"Extracted {len(claims)} claim(s) — none checkable, nothing to audit.")
+            elif node_name == "debate_claim":
+                completed += 1
+                verdicts = update.get("verdicts", [])
+                label = verdicts[0].label if verdicts else "unresolved"
+                confidence = verdicts[0].confidence if verdicts else "?"
+                total_display = total_checkable or completed
+                yield (
+                    "status",
+                    f"Judge deliberating... claim {completed}/{total_display} ruled "
+                    f"{label} ({confidence}/100).",
+                )
+            elif node_name == "aggregate":
+                yield ("status", "Finalizing results...")
+
     elapsed = time.monotonic() - start
-    return AuditResult(
+    final_state = final_state or {"claims": [], "arguments": {}, "verdicts": []}
+    result = AuditResult(
         original_text=text,
         claims=final_state["claims"],
         arguments={k: [a for a in v if a is not None] for k, v in final_state["arguments"].items()},
@@ -182,3 +219,11 @@ def run_audit(text: str) -> AuditResult:
         elapsed_seconds=elapsed,
         model_used=config.select_model(),
     )
+    yield ("result", result)
+
+
+def run_audit(text: str) -> AuditResult:
+    for kind, payload in stream_audit(text):
+        if kind == "result":
+            return payload
+    raise RuntimeError("stream_audit did not yield a result")
