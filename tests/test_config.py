@@ -1,16 +1,16 @@
 from ground_truth import config
 
 
-def test_select_model_defaults_to_gemini(monkeypatch):
+def test_select_model_prefers_groq_when_both_present(monkeypatch):
+    monkeypatch.setenv("GEMINI_API_KEY", "x")
+    monkeypatch.setenv("GROQ_API_KEY", "x")
+    assert config.select_model() == config.GROQ_MODEL
+
+
+def test_select_model_falls_back_to_gemini(monkeypatch):
     monkeypatch.setenv("GEMINI_API_KEY", "x")
     monkeypatch.delenv("GROQ_API_KEY", raising=False)
-    assert config.select_model() == config.DEFAULT_MODEL
-
-
-def test_select_model_falls_back_to_groq(monkeypatch):
-    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
-    monkeypatch.setenv("GROQ_API_KEY", "x")
-    assert config.select_model() == config.FALLBACK_MODEL
+    assert config.select_model() == config.GEMINI_MODEL
 
 
 def test_get_secret_reads_env(monkeypatch):

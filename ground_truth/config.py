@@ -9,17 +9,15 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 CACHE_DIR = ROOT_DIR / ".cache"
 PROMPTS_DIR = Path(__file__).resolve().parent / "prompts"
 
-# gemini-2.0-flash was retired by Google and now 404s ("no longer available to
-# new users"). gemini-flash-latest currently resolves to gemini-3.7-flash, whose
-# free tier is GenerateRequestsPerDayPerProjectPerModel-FreeTier = 20/day — easy
-# to exhaust with a multi-agent debate (each claim needs ~5 calls per round).
-# gemini-flash-lite-latest is a separate model with its own (in testing, much
-# less immediately exhausted) daily quota, so it's the safer default for a
-# zero-paid-key demo. Both are Google-maintained aliases that track whatever
-# model Google currently recommends, so this shouldn't go stale the way a pinned
-# version number did.
-DEFAULT_MODEL = "gemini/gemini-flash-lite-latest"
-FALLBACK_MODEL = "groq/llama-3.3-70b-versatile"
+# Groq is preferred over Gemini when both keys are present: its free tier is
+# dramatically faster (that's Groq's whole product — custom inference hardware)
+# and far more generous than Gemini's, which we hit a hard wall on mid-build
+# (gemini-2.0-flash retired outright; its replacement alias' free tier turned out
+# to be a 20 requests/DAY cap, trivially exhausted by one multi-agent debate).
+# Gemini stays configured as the fallback for whoever runs this with only a
+# Gemini key.
+GROQ_MODEL = "groq/llama-3.3-70b-versatile"
+GEMINI_MODEL = "gemini/gemini-flash-lite-latest"
 
 CACHE_TTL_SECONDS = 7 * 24 * 60 * 60
 MAX_REBUTTAL_ROUNDS = 2
@@ -30,16 +28,15 @@ LLM_MAX_REPAIR_ATTEMPTS = 2
 
 # Requests-per-minute cap shared by all LLM calls, enforced in llm.py. Claims are
 # audited concurrently (see graph.py), so without this a text with just 2-3 claims
-# can burst past a free-tier RPM quota in seconds. In testing against a real
-# gemini-flash-lite-latest free-tier key, the binding constraint turned out to be
-# a per-DAY quota on the full (non-lite) flash model, not a per-minute one on the
-# lite model — 8/min was overly conservative and became the main latency
-# bottleneck once that was fixed (a 4-claim audit at 8/min took ~150s of pure
-# throttling wait, matching ~20 calls / 8 per min almost exactly). At 15/min the
-# same class of 4-claim audit ran clean with zero rate-limit errors in ~75-135s
-# depending on how many claims needed the rebuttal round. Lower this if your
-# key's tier is tighter, raise it if you're on a paid tier.
-LLM_MAX_CALLS_PER_MINUTE = 15
+# can burst past a free-tier RPM quota in seconds. Tuned against real keys:
+# gemini-flash-lite-latest's binding constraint was a per-DAY quota, not RPM
+# (15/min ran clean); groq/llama-3.3-70b-versatile's published free tier is
+# ~30 RPM. At 15/min a clean 5-claim run took 190s, almost entirely our own
+# throttling wait rather than model latency; at 25/min (still under Groq's
+# limit) a 3-checkable-claim run completed in 67s with zero rate-limit errors —
+# right at the spec's 60s/5-claim target. Lower this if your key's tier is
+# tighter, raise it if you're on a paid tier.
+LLM_MAX_CALLS_PER_MINUTE = 25
 
 # Credibility heuristic domain lists — see search.py. Documented as a heuristic,
 # not ground truth: a simple signal to bias the judge, not an authority ranking.
@@ -77,11 +74,11 @@ def get_secret(key: str) -> str | None:
 
 
 def select_model() -> str:
-    if get_secret("GEMINI_API_KEY"):
-        return DEFAULT_MODEL
     if get_secret("GROQ_API_KEY"):
-        return FALLBACK_MODEL
-    return DEFAULT_MODEL
+        return GROQ_MODEL
+    if get_secret("GEMINI_API_KEY"):
+        return GEMINI_MODEL
+    return GROQ_MODEL
 
 
 def ensure_llm_env() -> None:

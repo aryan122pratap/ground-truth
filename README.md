@@ -110,7 +110,9 @@ ones — and the judge correctly ruled it `contradicted` at confidence 0, citing
 CRS-7 failure and a 2018 Starlink launch anomaly, with a dissent noting even the
 defender's own brief conceded it found no supporting evidence. That's the adversarial
 design working as intended: two independently-researched briefs, judged on evidence
-quality rather than which side sounded more confident.
+quality rather than which side sounded more confident. (This particular run predates the
+switch to preferring Groq as the default provider — see the tradeoffs below — but the
+mechanics are identical regardless of which provider is behind `structured_call()`.)
 
 ## Quickstart
 
@@ -118,13 +120,16 @@ quality rather than which side sounded more confident.
 git clone https://github.com/aryan122pratap/ground-truth.git
 cd ground-truth
 pip install -r requirements.txt
-cp .env.example .env   # then add GEMINI_API_KEY — get one free at aistudio.google.com/apikey
+cp .env.example .env   # then add GROQ_API_KEY — get one free at console.groq.com/keys
 streamlit run app.py
 ```
 
-No `TAVILY_API_KEY` is required — `search.py` falls back to `ddgs` (DuckDuckGo, no key
-needed) automatically. Every third-party dependency in the default configuration has a
-free tier.
+Groq is preferred over Gemini when both keys are present (`config.select_model()`) — its
+free tier is both faster and far more generous than Gemini's, which has a hard ceiling
+low enough that a single multi-claim audit can exhaust it (see the tradeoffs below). A
+`GEMINI_API_KEY` alone still works as a fallback. No `TAVILY_API_KEY` is required —
+`search.py` falls back to `ddgs` (DuckDuckGo, no key needed) automatically. Every
+third-party dependency in the default configuration has a free tier.
 
 ## Design decisions & tradeoffs
 
@@ -140,23 +145,24 @@ free tier.
   a `.gov` page can be wrong and a small outlet can break a real story first.
 - **Claims are audited in parallel, per-claim.** Each checkable claim gets its own
   `Send`-dispatched subgraph invocation, so latency scales with the slowest single claim
-  rather than the claim count — in principle. In practice, on a real free-tier key the
-  binding constraint turned out to be a **shared** per-minute quota across all
-  concurrent calls (see `llm.py`'s `_RateLimiter` and the note on `LLM_MAX_CALLS_PER_MINUTE`
-  in `config.py`), so parallelism reduces latency but doesn't eliminate the linear cost of
-  more claims needing more total LLM calls. Measured on a real key: a 4-claim audit took
-  ~75-135s depending on how many claims needed the rebuttal round, above the spec's
-  60-second target for 5 claims. The knob to trade off is `LLM_MAX_CALLS_PER_MINUTE`
-  against your key's actual tier.
-- **The default model is `gemini-flash-lite-latest`, not a pinned version.** The spec's
+  rather than the claim count — in principle. In practice, all concurrent calls share one
+  requests-per-minute budget (`llm.py`'s `_RateLimiter`, capped by
+  `config.LLM_MAX_CALLS_PER_MINUTE`), so parallelism reduces latency but doesn't eliminate
+  the cost of more claims needing more total LLM calls. This was tuned against two real
+  keys: on Gemini's free tier, throttling at 15/min was the safe ceiling and a 4-claim
+  audit still took ~75-135s. Switching the default provider to Groq (see below) and
+  raising the cap to 25/min (still under Groq's ~30 RPM published free tier) got a
+  3-checkable-claim audit down to 67s with zero rate-limit errors — right at the spec's
+  60s/5-claim target. That number will still move with claim count, rebuttal rounds, and
+  whatever quota your specific key actually has.
+- **Groq is the preferred provider, not Gemini as the spec originally named.** The spec's
   original `gemini-2.0-flash` was retired by Google mid-build (404, "no longer available
-  to new users"). Its replacement alias, `gemini-flash-latest`, currently resolves to
-  `gemini-3.7-flash`, whose free tier turned out to be a hard
-  `GenerateRequestsPerDayPerProjectPerModel-FreeTier` cap of just 20 requests/day — easy
-  to exhaust with a single multi-claim audit (~5 LLM calls per claim per round). The lite
-  alias has its own, separate quota. Both are Google-maintained aliases rather than a
-  pinned model name, trading a small amount of run-to-run consistency for not going stale
-  the same way again.
+  to new users"); its replacement alias resolves to a model whose free tier is a hard
+  20 requests/**day** cap, trivial to exhaust with one multi-claim audit (~5 LLM calls per
+  claim per round). Groq's free tier is both faster (purpose-built inference hardware) and
+  far more generous, so `config.select_model()` now prefers a `GROQ_API_KEY` when present
+  and falls back to `gemini-flash-lite-latest` (a Google-maintained alias, not a pinned
+  version, so it shouldn't go stale the same way) when it isn't.
 - **Agent outputs reference evidence by index, not by re-emitting full `Evidence` JSON.**
   Prosecutor/defender/judge LLM calls return a small draft schema
   (`used_evidence_indices` / `key_citation_indices`) pointing into evidence already
@@ -179,12 +185,13 @@ free tier.
 - English-only; claim extraction and query generation are not tested against other
   languages.
 - The credibility heuristic is domain-based only, per the tradeoff above.
-- Free-tier Gemini quotas are tight and change without notice — a model that works today
-  may 404 or exhaust its daily quota tomorrow. If `streamlit run app.py` shows every claim
-  as `unverifiable` with a "Judge agent failed" reasoning, check for a `RateLimitError` in
-  the terminal: it usually means the day's free quota for the configured model is spent,
-  not that something is broken. Swapping `DEFAULT_MODEL` in `config.py` to a different
-  Gemini alias, or setting `GROQ_API_KEY` for the fallback, works around it.
+- Free-tier LLM quotas are tight and change without notice — a model that works today may
+  404 or exhaust its quota tomorrow (this happened mid-build with `gemini-2.0-flash`,
+  which is why Groq is now preferred). If `streamlit run app.py` shows every claim as
+  `unverifiable` with a "Judge agent failed" reasoning, check for a `RateLimitError` in
+  the terminal: it usually means the configured model's quota is spent for the current
+  window, not that something is broken. Setting a `GROQ_API_KEY`, or swapping the model
+  names in `config.py`, works around it.
 
 ## Roadmap
 
