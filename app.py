@@ -17,6 +17,11 @@ st.caption(
 if "input_text" not in st.session_state:
     st.session_state["input_text"] = ""
 
+
+def _use_example(text: str) -> None:
+    st.session_state["input_text"] = text
+
+
 st.text_area(
     "Paste text to audit",
     height=200,
@@ -27,9 +32,7 @@ st.text_area(
 st.caption("Try an example:")
 example_cols = st.columns(len(EXAMPLES))
 for col, (label, sample_text) in zip(example_cols, EXAMPLES):
-    if col.button(label, use_container_width=True):
-        st.session_state["input_text"] = sample_text
-        st.rerun()
+    col.button(label, use_container_width=True, on_click=_use_example, args=(sample_text,))
 
 run_clicked = st.button(
     "Run audit", type="primary", disabled=not st.session_state["input_text"].strip()
