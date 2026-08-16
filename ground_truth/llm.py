@@ -1,5 +1,8 @@
 import json
 import re
+import threading
+import time
+from collections import deque
 from typing import TypeVar
 
 from pydantic import BaseModel, ValidationError
@@ -14,6 +17,33 @@ _FENCE_RE = re.compile(r"^```(?:json)?\s*|\s*```$", re.MULTILINE)
 
 class LLMError(RuntimeError):
     """Raised when the LLM fails to produce output matching the requested schema."""
+
+
+class _RateLimiter:
+    """Sliding-window limiter shared by every LLM call. Claims audit concurrently
+    (see graph.py's Send fan-out), so without this a text with just a couple of
+    claims bursts well past a free-tier requests-per-minute quota in seconds."""
+
+    def __init__(self, max_calls: int, period_seconds: float):
+        self.max_calls = max_calls
+        self.period = period_seconds
+        self._lock = threading.Lock()
+        self._calls: deque[float] = deque()
+
+    def acquire(self) -> None:
+        while True:
+            with self._lock:
+                now = time.monotonic()
+                while self._calls and now - self._calls[0] > self.period:
+                    self._calls.popleft()
+                if len(self._calls) < self.max_calls:
+                    self._calls.append(now)
+                    return
+                sleep_for = self.period - (now - self._calls[0]) + 0.05
+            time.sleep(sleep_for)
+
+
+_rate_limiter = _RateLimiter(config.LLM_MAX_CALLS_PER_MINUTE, 60.0)
 
 
 def load_prompt(name: str) -> str:
@@ -41,11 +71,12 @@ def _chat(messages: list[dict], model: str, temperature: float) -> str:
     import litellm
 
     config.ensure_llm_env()
+    _rate_limiter.acquire()
     response = litellm.completion(model=model, messages=messages, temperature=temperature)
     return response["choices"][0]["message"]["content"]
 
 
-@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=1, max=8))
+@retry(stop=stop_after_attempt(4), wait=wait_exponential(multiplier=2, min=2, max=30))
 def _chat_with_retry(messages: list[dict], model: str, temperature: float) -> str:
     return _chat(messages, model, temperature)
 

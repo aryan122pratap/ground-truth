@@ -83,55 +83,34 @@ Both diagrams are regenerated straight from the compiled graph objects with
 
 ## How the debate works
 
-Walking one claim through the pipeline, for the input claim *"SpaceX's Falcon 9 rocket
-was the first orbital-class rocket capable of reflight, achieving this in 2017."*
-
-**Prosecutor** searches queries like `"Falcon 9 reflight 2017 debunked"` and
-`"first reusable orbital rocket criticism"`, reviews what comes back, and — finding
-nothing that actually contradicts the claim — returns an honest low-strength argument
-rather than inventing an objection:
+This is real, live-captured output from `scripts/run_cli.py` (`gemini/gemini-flash-lite-latest`,
+free tier) auditing the "Mixed" example, for the extracted claim *"SpaceX's Falcon 9
+rocket achieved reflight in 2017."* The prosecutor searched for anything that would
+refute or complicate the claim and came back empty; the defender found wire-service and
+encyclopedia coverage of the March 2017 SES-10 mission. The judge's verdict:
 
 ```json
 {
-  "stance": "refute",
-  "reasoning": "No credible source disputes the 2017 reflight date or SpaceX's claim to the milestone; the closest counterpoint is that some sources describe the Space Shuttle as 'partially reusable' decades earlier, but it was not an orbital-class expendable-to-reusable conversion of the same kind.",
-  "strength": 0.15,
-  "evidence": []
-}
-```
-
-**Defender** searches `"Falcon 9 first reflight confirmed"` and `"SpaceX reusable rocket
-2017 evidence"`, finds a wire-service report, and builds a confident case:
-
-```json
-{
-  "stance": "support",
-  "reasoning": "Reuters confirms SpaceX successfully relaunched a previously-flown Falcon 9 first stage on March 30, 2017, widely reported as the first reflight of an orbital-class rocket.",
-  "strength": 0.9,
-  "evidence": [
-    {"url": "https://www.reuters.com/...", "title": "SpaceX launches, lands recycled rocket in historic first", "source_domain": "reuters.com", "credibility": 0.8}
+  "claim_id": "c3",
+  "confidence": 100,
+  "label": "supported",
+  "reasoning": "Multiple independent sources, including Wikipedia and reporting from major outlets like The Guardian, confirm that SpaceX successfully achieved the first reflight of an orbital-class Falcon 9 rocket on March 30, 2017, with the SES-10 mission.",
+  "dissent": "The prosecution brief itself noted that it found no contradicting evidence and that the provided evidence explicitly supports the claim, meaning there is no substantive argument against the claim.",
+  "key_citations": [
+    {"url": "https://en.wikipedia.org/wiki/Falcon_9"},
+    {"url": "https://spacepolicyonline.com/news/spacex-launches-lands-reused-first-stage"},
+    {"url": "https://www.theguardian.com/science/2017/mar/30/spacex-falcon-9-elon-musk-reusable-rocket"}
   ]
 }
 ```
 
-**Judge** weighs both, notes the prosecution never actually found a contradiction, and
-still surfaces its strongest surviving point as the required dissent:
-
-```json
-{
-  "claim_id": "c1",
-  "confidence": 93,
-  "label": "supported",
-  "reasoning": "A high-credibility wire-service source directly confirms the claim; the prosecution found no credible contradicting evidence.",
-  "dissent": "The Space Shuttle program is sometimes cited as an earlier reusable-vehicle milestone, though it differs in kind from a full orbital-class booster reflight.",
-  "key_citations": [{"url": "https://www.reuters.com/...", "source_domain": "reuters.com", "credibility": 0.8}]
-}
-```
-
-*(This is a representative worked example matching the exact schema each agent
-produces — this environment has no LLM API key configured, so it wasn't captured from a
-live run. `pytest` exercises the real code path with a mocked LLM; `scripts/run_cli.py`
-will produce real output once a `GEMINI_API_KEY` or `GROQ_API_KEY` is set.)*
+The same run also extracted *"SpaceX has never had a launch failure in its entire
+history"* from the same input text — a false claim planted right next to three true
+ones — and the judge correctly ruled it `contradicted` at confidence 0, citing the 2015
+CRS-7 failure and a 2018 Starlink launch anomaly, with a dissent noting even the
+defender's own brief conceded it found no supporting evidence. That's the adversarial
+design working as intended: two independently-researched briefs, judged on evidence
+quality rather than which side sounded more confident.
 
 ## Quickstart
 
@@ -139,7 +118,7 @@ will produce real output once a `GEMINI_API_KEY` or `GROQ_API_KEY` is set.)*
 git clone https://github.com/aryan122pratap/ground-truth.git
 cd ground-truth
 pip install -r requirements.txt
-cp .env.example .env   # then add GEMINI_API_KEY (free tier) at minimum
+cp .env.example .env   # then add GEMINI_API_KEY — get one free at aistudio.google.com/apikey
 streamlit run app.py
 ```
 
@@ -160,9 +139,24 @@ free tier.
   is 0.5). It's a cheap prior to help the judge weigh sources, not an authority ranking —
   a `.gov` page can be wrong and a small outlet can break a real story first.
 - **Claims are audited in parallel, per-claim.** Each checkable claim gets its own
-  `Send`-dispatched subgraph invocation so a 5-claim audit takes roughly as long as the
-  slowest single claim, not 5x a single claim's latency — important given the 60-second
-  target in the definition of done.
+  `Send`-dispatched subgraph invocation, so latency scales with the slowest single claim
+  rather than the claim count — in principle. In practice, on a real free-tier key the
+  binding constraint turned out to be a **shared** per-minute quota across all
+  concurrent calls (see `llm.py`'s `_RateLimiter` and the note on `LLM_MAX_CALLS_PER_MINUTE`
+  in `config.py`), so parallelism reduces latency but doesn't eliminate the linear cost of
+  more claims needing more total LLM calls. Measured on a real key: a 4-claim audit took
+  ~75-135s depending on how many claims needed the rebuttal round, above the spec's
+  60-second target for 5 claims. The knob to trade off is `LLM_MAX_CALLS_PER_MINUTE`
+  against your key's actual tier.
+- **The default model is `gemini-flash-lite-latest`, not a pinned version.** The spec's
+  original `gemini-2.0-flash` was retired by Google mid-build (404, "no longer available
+  to new users"). Its replacement alias, `gemini-flash-latest`, currently resolves to
+  `gemini-3.7-flash`, whose free tier turned out to be a hard
+  `GenerateRequestsPerDayPerProjectPerModel-FreeTier` cap of just 20 requests/day — easy
+  to exhaust with a single multi-claim audit (~5 LLM calls per claim per round). The lite
+  alias has its own, separate quota. Both are Google-maintained aliases rather than a
+  pinned model name, trading a small amount of run-to-run consistency for not going stale
+  the same way again.
 - **Agent outputs reference evidence by index, not by re-emitting full `Evidence` JSON.**
   Prosecutor/defender/judge LLM calls return a small draft schema
   (`used_evidence_indices` / `key_citation_indices`) pointing into evidence already
@@ -185,6 +179,12 @@ free tier.
 - English-only; claim extraction and query generation are not tested against other
   languages.
 - The credibility heuristic is domain-based only, per the tradeoff above.
+- Free-tier Gemini quotas are tight and change without notice — a model that works today
+  may 404 or exhaust its daily quota tomorrow. If `streamlit run app.py` shows every claim
+  as `unverifiable` with a "Judge agent failed" reasoning, check for a `RateLimitError` in
+  the terminal: it usually means the day's free quota for the configured model is spent,
+  not that something is broken. Swapping `DEFAULT_MODEL` in `config.py` to a different
+  Gemini alias, or setting `GROQ_API_KEY` for the fallback, works around it.
 
 ## Roadmap
 
