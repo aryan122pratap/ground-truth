@@ -198,6 +198,18 @@ div[data-testid="stButton"] button[kind="primary"] {
     box-shadow: 0 6px 20px rgba(245,158,11,0.35);
     transition: all 0.15s ease;
 }
+div[data-testid="stButton"] button[kind="primary"] p,
+div[data-testid="stButton"] button[kind="primary"] div {
+    color: #1a1305 !important;
+}
+div[data-testid="stButton"] button[kind="primary"]:disabled {
+    background: rgba(255,235,210,0.06);
+    box-shadow: none;
+}
+div[data-testid="stButton"] button[kind="primary"]:disabled p,
+div[data-testid="stButton"] button[kind="primary"]:disabled div {
+    color: #6b6255 !important;
+}
 div[data-testid="stButton"] button[kind="primary"]:not(:disabled):hover {
     transform: translateY(-1px);
     box-shadow: 0 8px 26px rgba(245,158,11,0.5);
