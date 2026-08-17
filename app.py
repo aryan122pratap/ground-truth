@@ -20,10 +20,10 @@ html, body, [class*="css"] {
 
 [data-testid="stAppViewContainer"] {
     background:
-        radial-gradient(ellipse 900px 500px at 8% -10%, rgba(13,148,136,0.28), transparent 60%),
-        radial-gradient(ellipse 700px 500px at 95% 5%, rgba(139,92,246,0.16), transparent 55%),
-        radial-gradient(ellipse 800px 600px at 50% 110%, rgba(217,119,6,0.08), transparent 60%),
-        #0b0f14;
+        radial-gradient(ellipse 900px 500px at 8% -10%, rgba(245,158,11,0.26), transparent 60%),
+        radial-gradient(ellipse 700px 500px at 95% 5%, rgba(139,92,246,0.14), transparent 55%),
+        radial-gradient(ellipse 800px 600px at 50% 110%, rgba(225,29,72,0.07), transparent 60%),
+        #0f0d0a;
 }
 
 .block-container {
@@ -41,9 +41,9 @@ html, body, [class*="css"] {
     letter-spacing: 0.12em;
     font-size: 0.72rem;
     font-weight: 700;
-    color: #5eead4;
-    background: rgba(13,148,136,0.14);
-    border: 1px solid rgba(94,234,212,0.3);
+    color: #fbbf24;
+    background: rgba(245,158,11,0.14);
+    border: 1px solid rgba(251,191,36,0.32);
     padding: 0.3rem 0.75rem;
     border-radius: 999px;
     margin-bottom: 1rem;
@@ -54,20 +54,20 @@ html, body, [class*="css"] {
     letter-spacing: -0.03em;
     margin: 0 0 0.7rem 0;
     line-height: 1.05;
-    background: linear-gradient(135deg, #ffffff 20%, #5eead4 65%, #2dd4bf 100%);
+    background: linear-gradient(135deg, #ffffff 20%, #fbbf24 65%, #f59e0b 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 0 30px rgba(45,212,191,0.25));
+    filter: drop-shadow(0 0 30px rgba(245,158,11,0.28));
 }
 .gt-sub {
-    color: #a8b3c2;
+    color: #b8ada0;
     font-size: 1.08rem;
     line-height: 1.65;
     max-width: 680px;
     margin-bottom: 1.4rem;
 }
-.gt-sub a { color: #5eead4; text-decoration: none; font-weight: 600; }
+.gt-sub a { color: #fbbf24; text-decoration: none; font-weight: 600; }
 .gt-sub a:hover { text-decoration: underline; }
 
 .gt-badges { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 2.2rem; }
@@ -77,9 +77,9 @@ html, body, [class*="css"] {
     gap: 0.35rem;
     font-size: 0.8rem;
     font-weight: 600;
-    color: #c3cbd6;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
+    color: #c9beb0;
+    background: rgba(255,235,210,0.05);
+    border: 1px solid rgba(255,235,210,0.1);
     padding: 0.35rem 0.85rem;
     border-radius: 999px;
 }
@@ -93,8 +93,8 @@ html, body, [class*="css"] {
 }
 .gt-step {
     flex: 1;
-    background: linear-gradient(160deg, rgba(255,255,255,0.045), rgba(255,255,255,0.015));
-    border: 1px solid rgba(255,255,255,0.09);
+    background: linear-gradient(160deg, rgba(255,235,210,0.045), rgba(255,235,210,0.015));
+    border: 1px solid rgba(255,235,210,0.09);
     border-radius: 16px;
     padding: 1.2rem 1.3rem;
     box-shadow: 0 8px 24px rgba(0,0,0,0.25);
@@ -108,15 +108,15 @@ html, body, [class*="css"] {
     background: linear-gradient(135deg, var(--c1), var(--c2));
     box-shadow: 0 4px 14px color-mix(in srgb, var(--c1) 45%, transparent);
 }
-.gt-step-title { font-weight: 700; font-size: 0.98rem; color: #e6edf3; margin-bottom: 0.3rem; }
-.gt-step-desc { font-size: 0.85rem; color: #93a0b0; line-height: 1.5; }
-.gt-arrow { display: flex; align-items: center; color: #3d4b5c; font-size: 1.3rem; padding: 0 0.1rem; }
+.gt-step-title { font-weight: 700; font-size: 0.98rem; color: #f0ebe4; margin-bottom: 0.3rem; }
+.gt-step-desc { font-size: 0.85rem; color: #a89e91; line-height: 1.5; }
+.gt-arrow { display: flex; align-items: center; color: #4a4237; font-size: 1.3rem; padding: 0 0.1rem; }
 @media (max-width: 900px) { .gt-steps { flex-direction: column; } .gt-arrow { display: none; } }
 
 /* Cards */
 .gt-card {
-    background: linear-gradient(160deg, rgba(255,255,255,0.035), rgba(255,255,255,0.01)), #131922;
-    border: 1px solid rgba(255,255,255,0.09);
+    background: linear-gradient(160deg, rgba(255,235,210,0.035), rgba(255,235,210,0.01)), #1c1712;
+    border: 1px solid rgba(255,235,210,0.09);
     border-radius: 16px;
     padding: 1.5rem 1.7rem;
     margin-bottom: 1.3rem;
@@ -126,7 +126,7 @@ html, body, [class*="css"] {
     font-size: 1.08rem;
     font-weight: 700;
     margin-bottom: 0.3rem;
-    color: #e6edf3;
+    color: #f0ebe4;
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -136,8 +136,8 @@ html, body, [class*="css"] {
 .gt-annotated {
     font-size: 1.08rem;
     line-height: 2.15;
-    background: rgba(0,0,0,0.18);
-    border: 1px solid rgba(255,255,255,0.06);
+    background: rgba(0,0,0,0.22);
+    border: 1px solid rgba(255,235,210,0.06);
     border-radius: 12px;
     padding: 1.2rem 1.4rem;
 }
@@ -150,7 +150,7 @@ html, body, [class*="css"] {
 
 /* Legend chips */
 .gt-legend { display: flex; gap: 1.1rem; flex-wrap: wrap; margin-bottom: 1rem; }
-.gt-legend-item { display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; color: #9aa7b5; }
+.gt-legend-item { display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; color: #a89e91; }
 .gt-legend-dot {
     width: 10px; height: 10px; border-radius: 50%; display: inline-block;
     box-shadow: 0 0 8px 1px var(--dot-glow, transparent);
@@ -161,8 +161,8 @@ html, body, [class*="css"] {
 .gt-stat {
     position: relative;
     overflow: hidden;
-    background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 14%, #10151b), #10151b 55%);
-    border: 1px solid rgba(255,255,255,0.08);
+    background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 14%, #150f0a), #150f0a 55%);
+    border: 1px solid rgba(255,235,210,0.08);
     border-radius: 13px;
     padding: 1rem 1.1rem;
     transition: transform 0.18s ease, box-shadow 0.18s ease;
@@ -171,36 +171,36 @@ html, body, [class*="css"] {
 .gt-stat::before {
     content: "";
     position: absolute; top: 0; left: 0; right: 0; height: 3px;
-    background: var(--accent, #0d9488);
+    background: var(--accent, #f59e0b);
 }
-.gt-stat-value { font-size: 1.75rem; font-weight: 800; color: var(--accent, #e6edf3); line-height: 1.1; }
-.gt-stat-label { font-size: 0.78rem; color: #93a0b0; margin-top: 0.3rem; font-weight: 500; }
+.gt-stat-value { font-size: 1.75rem; font-weight: 800; color: var(--accent, #f0ebe4); line-height: 1.1; }
+.gt-stat-label { font-size: 0.78rem; color: #a89e91; margin-top: 0.3rem; font-weight: 500; }
 @media (max-width: 900px) { .gt-stats { grid-template-columns: repeat(2, 1fr); } }
 
 /* Buttons */
 div[data-testid="stButton"] button[kind="secondary"] {
     border-radius: 999px;
-    border: 1px solid rgba(255,255,255,0.12);
-    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,235,210,0.12);
+    background: rgba(255,235,210,0.04);
     transition: all 0.15s ease;
 }
 div[data-testid="stButton"] button[kind="secondary"]:hover {
-    border-color: #2dd4bf;
-    color: #5eead4;
-    background: rgba(13,148,136,0.12);
+    border-color: #f59e0b;
+    color: #fbbf24;
+    background: rgba(245,158,11,0.12);
     transform: translateY(-1px);
 }
 div[data-testid="stButton"] button[kind="primary"] {
     border-radius: 10px;
     font-weight: 700;
-    background: linear-gradient(135deg, #14b8a6, #0d9488);
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
     border: none;
-    box-shadow: 0 6px 20px rgba(13,148,136,0.35);
+    box-shadow: 0 6px 20px rgba(245,158,11,0.35);
     transition: all 0.15s ease;
 }
 div[data-testid="stButton"] button[kind="primary"]:not(:disabled):hover {
     transform: translateY(-1px);
-    box-shadow: 0 8px 26px rgba(13,148,136,0.5);
+    box-shadow: 0 8px 26px rgba(245,158,11,0.5);
 }
 
 /* Input card focus glow */
@@ -208,18 +208,18 @@ div[data-testid="stVerticalBlockBorderWrapper"]:has(textarea) {
     box-shadow: 0 12px 34px rgba(0,0,0,0.35);
 }
 textarea:focus {
-    box-shadow: 0 0 0 2px rgba(45,212,191,0.4) !important;
+    box-shadow: 0 0 0 2px rgba(245,158,11,0.4) !important;
 }
 
 /* Expanders as claim cards */
 div[data-testid="stExpander"] {
     border-radius: 12px !important;
-    border: 1px solid rgba(255,255,255,0.09) !important;
+    border: 1px solid rgba(255,235,210,0.09) !important;
     margin-bottom: 0.6rem;
     box-shadow: 0 6px 18px rgba(0,0,0,0.22);
 }
 
-.gt-footer { color: #6b7280; font-size: 0.82rem; line-height: 1.6; }
+.gt-footer { color: #7a7166; font-size: 0.82rem; line-height: 1.6; }
 </style>
 """
 st.markdown(_CSS, unsafe_allow_html=True)
@@ -240,7 +240,7 @@ with real citations and an honest dissenting view.
 </div>
 <div class="gt-steps">
     <div class="gt-step">
-        <div class="gt-step-icon" style="--c1:#0d9488;--c2:#2dd4bf;">✂️</div>
+        <div class="gt-step-icon" style="--c1:#f59e0b;--c2:#fbbf24;">✂️</div>
         <div class="gt-step-title">1. Extract claims</div>
         <div class="gt-step-desc">Splits your text into atomic, checkable statements — skipping opinions and predictions.</div>
     </div>
@@ -326,7 +326,7 @@ if result is not None:
     counts = summary["label_counts"]
     stats_html = f"""
     <div class="gt-stats">
-      <div class="gt-stat" style="--accent:#5eead4"><div class="gt-stat-value">{score_display}</div><div class="gt-stat-label">📊 Truthfulness score</div></div>
+      <div class="gt-stat" style="--accent:#fbbf24"><div class="gt-stat-value">{score_display}</div><div class="gt-stat-label">📊 Truthfulness score</div></div>
       <div class="gt-stat" style="--accent:{LABEL_COLORS['supported']}"><div class="gt-stat-value">{counts['supported']}</div><div class="gt-stat-label">🟢 Supported</div></div>
       <div class="gt-stat" style="--accent:{LABEL_COLORS['disputed']}"><div class="gt-stat-value">{counts['disputed']}</div><div class="gt-stat-label">🟡 Disputed</div></div>
       <div class="gt-stat" style="--accent:{LABEL_COLORS['contradicted']}"><div class="gt-stat-value">{counts['contradicted']}</div><div class="gt-stat-label">🔴 Contradicted</div></div>
@@ -350,7 +350,7 @@ if result is not None:
                 ),
                 text=[f"{v.confidence}" for v in verdicts_sorted],
                 textposition="outside",
-                textfont=dict(color="#e6edf3"),
+                textfont=dict(color="#f0ebe4"),
                 customdata=[v.label for v in verdicts_sorted],
                 hovertemplate="<b>%{y}</b><br>%{customdata} — %{x}/100<extra></extra>",
             )
@@ -358,12 +358,12 @@ if result is not None:
         fig.update_layout(
             paper_bgcolor="rgba(0,0,0,0)",
             plot_bgcolor="rgba(0,0,0,0)",
-            font=dict(family="Inter, sans-serif", color="#9aa7b5", size=13),
+            font=dict(family="Inter, sans-serif", color="#a89e91", size=13),
             xaxis=dict(
                 title="Confidence (0-100)",
                 range=[0, 108],
-                gridcolor="rgba(255,255,255,0.08)",
-                zerolinecolor="rgba(255,255,255,0.08)",
+                gridcolor="rgba(255,235,210,0.08)",
+                zerolinecolor="rgba(255,235,210,0.08)",
             ),
             yaxis=dict(title=None, gridcolor="rgba(0,0,0,0)"),
             bargap=0.4,
@@ -412,7 +412,7 @@ if result is not None:
 
 st.markdown(
     """
-<div class="gt-footer" style="margin-top:2rem; padding-top:1rem; border-top:1px solid rgba(255,255,255,0.08);">
+<div class="gt-footer" style="margin-top:2rem; padding-top:1rem; border-top:1px solid rgba(255,235,210,0.08);">
 ⚠️ This is an AI-assisted research aid. Scores are model judgments over web search results,
 not ground truth, and this tool is not a substitute for human fact-checking.
 </div>
