@@ -3,8 +3,7 @@
 Adversarial multi-agent fact auditor — two AI agents argue for and against every claim
 in a piece of text, and a judge scores each one with citations and an honest dissent.
 
-**Live demo:** not yet deployed — see [Deployment](#deployment) below. Once deployed,
-the Streamlit Community Cloud URL goes here and in the GitHub repo's About section.
+**Live demo: [gtruth.streamlit.app](https://gtruth.streamlit.app/)**
 
 ![demo](assets/demo.gif)
 <!-- TODO(human): record a ~20s GIF of a real audit run (paste an example, click Run,
