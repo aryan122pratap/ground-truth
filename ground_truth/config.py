@@ -16,7 +16,14 @@ PROMPTS_DIR = Path(__file__).resolve().parent / "prompts"
 # to be a 20 requests/DAY cap, trivially exhausted by one multi-agent debate).
 # Gemini stays configured as the fallback for whoever runs this with only a
 # Gemini key.
-GROQ_MODEL = "groq/llama-3.3-70b-versatile"
+#
+# llama-3.3-70b-versatile (this constant's original value) was decommissioned
+# by Groq mid-build — "does not exist or you do not have access to it." Same
+# for llama-3.1-8b-instant, llama3-70b-8192, gemma2-9b-it, and
+# deepseek-r1-distill-llama-70b, all of which 404/400 on a real key as of
+# 2026-08-17. openai/gpt-oss-120b (OpenAI's open-weight model, Groq-hosted) is
+# confirmed live against a real key at time of writing.
+GROQ_MODEL = "groq/openai/gpt-oss-120b"
 GEMINI_MODEL = "gemini/gemini-flash-lite-latest"
 
 CACHE_TTL_SECONDS = 7 * 24 * 60 * 60
@@ -28,15 +35,17 @@ LLM_MAX_REPAIR_ATTEMPTS = 2
 
 # Requests-per-minute cap shared by all LLM calls, enforced in llm.py. Claims are
 # audited concurrently (see graph.py), so without this a text with just 2-3 claims
-# can burst past a free-tier RPM quota in seconds. Tuned against real keys:
-# gemini-flash-lite-latest's binding constraint was a per-DAY quota, not RPM
-# (15/min ran clean); groq/llama-3.3-70b-versatile's published free tier is
-# ~30 RPM. At 15/min a clean 5-claim run took 190s, almost entirely our own
-# throttling wait rather than model latency; at 25/min (still under Groq's
-# limit) a 3-checkable-claim run completed in 67s with zero rate-limit errors —
-# right at the spec's 60s/5-claim target. Lower this if your key's tier is
-# tighter, raise it if you're on a paid tier.
-LLM_MAX_CALLS_PER_MINUTE = 25
+# can burst past a free-tier RPM quota in seconds.
+#
+# groq/llama-3.3-70b-versatile (this file's original model) got decommissioned
+# by Groq mid-build; its replacement, groq/openai/gpt-oss-120b, has a tighter
+# free-tier limit — 25/min (tuned for the old model) still produced a real
+# RateLimitError on the judge call partway through a 4-claim run. Dropped to
+# 12/min for the new model. If you change GROQ_MODEL, re-verify this number
+# with a live run rather than assuming it still holds — Groq's per-model free
+# tiers are not uniform and change without notice (see the GROQ_MODEL comment
+# above for the full list of models that stopped working during this build).
+LLM_MAX_CALLS_PER_MINUTE = 12
 
 # Credibility heuristic domain lists — see search.py. Documented as a heuristic,
 # not ground truth: a simple signal to bias the judge, not an authority ranking.

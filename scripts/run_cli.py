@@ -6,6 +6,9 @@ Usage: python scripts/run_cli.py "some text to audit"
 import sys
 from pathlib import Path
 
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from ground_truth.graph import run_audit  # noqa: E402
