@@ -18,13 +18,26 @@ html, body, [class*="css"] {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-[data-testid="stAppViewContainer"] {
-    background:
-        radial-gradient(ellipse 900px 500px at 8% -10%, rgba(245,158,11,0.26), transparent 60%),
-        radial-gradient(ellipse 700px 500px at 95% 5%, rgba(139,92,246,0.14), transparent 55%),
-        radial-gradient(ellipse 800px 600px at 50% 110%, rgba(225,29,72,0.07), transparent 60%),
-        #0f0d0a;
-}
+body { background: #0a0710; }
+[data-testid="stAppViewContainer"] { background: transparent; }
+[data-testid="stHeader"] { background: transparent; }
+[data-testid="stToolbar"] { background: transparent; }
+
+/* Floating blurred blobs behind everything — the glassmorphism backdrop */
+.gt-blob-layer { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.gt-blob { position: absolute; border-radius: 50%; filter: blur(90px); }
+.gt-blob-1 { width: 480px; height: 480px; top: -140px; left: -120px; background: #8b5cf6; opacity: 0.5; animation: gt-float-a 24s ease-in-out infinite; }
+.gt-blob-2 { width: 420px; height: 420px; top: 8%; right: -160px; background: #ec4899; opacity: 0.42; animation: gt-float-b 28s ease-in-out infinite; }
+.gt-blob-3 { width: 400px; height: 400px; bottom: -140px; left: 22%; background: #f59e0b; opacity: 0.32; animation: gt-float-c 22s ease-in-out infinite; }
+.gt-blob-4 { width: 340px; height: 340px; bottom: 6%; right: 8%; background: #f43f5e; opacity: 0.3; animation: gt-float-a 26s ease-in-out infinite reverse; }
+@keyframes gt-float-a { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(50px,35px) scale(1.1); } }
+@keyframes gt-float-b { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-40px,45px) scale(0.92); } }
+@keyframes gt-float-c { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(30px,-40px) scale(1.06); } }
+
+@keyframes gt-fade-up { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+.gt-anim-1 { animation: gt-fade-up 0.65s cubic-bezier(0.16,1,0.3,1) both; }
+.gt-anim-2 { animation: gt-fade-up 0.65s cubic-bezier(0.16,1,0.3,1) 0.08s both; }
+.gt-anim-3 { animation: gt-fade-up 0.65s cubic-bezier(0.16,1,0.3,1) 0.16s both; }
 
 .block-container {
     max-width: 1120px;
@@ -41,9 +54,11 @@ html, body, [class*="css"] {
     letter-spacing: 0.12em;
     font-size: 0.72rem;
     font-weight: 700;
-    color: #fbbf24;
-    background: rgba(245,158,11,0.14);
-    border: 1px solid rgba(251,191,36,0.32);
+    color: #e9d5ff;
+    background: rgba(139,92,246,0.16);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(216,180,254,0.3);
     padding: 0.3rem 0.75rem;
     border-radius: 999px;
     margin-bottom: 1rem;
@@ -54,20 +69,20 @@ html, body, [class*="css"] {
     letter-spacing: -0.03em;
     margin: 0 0 0.7rem 0;
     line-height: 1.05;
-    background: linear-gradient(135deg, #ffffff 20%, #fbbf24 65%, #f59e0b 100%);
+    background: linear-gradient(120deg, #ffffff 15%, #d8b4fe 50%, #f0abfc 75%, #fbcfe8 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 0 30px rgba(245,158,11,0.28));
+    filter: drop-shadow(0 0 40px rgba(168,85,247,0.35));
 }
 .gt-sub {
-    color: #b8ada0;
+    color: #cbc3d9;
     font-size: 1.08rem;
     line-height: 1.65;
     max-width: 680px;
     margin-bottom: 1.4rem;
 }
-.gt-sub a { color: #fbbf24; text-decoration: none; font-weight: 600; }
+.gt-sub a { color: #e9d5ff; text-decoration: none; font-weight: 600; }
 .gt-sub a:hover { text-decoration: underline; }
 
 .gt-badges { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 2.2rem; }
@@ -77,68 +92,78 @@ html, body, [class*="css"] {
     gap: 0.35rem;
     font-size: 0.8rem;
     font-weight: 600;
-    color: #c9beb0;
-    background: rgba(255,235,210,0.05);
-    border: 1px solid rgba(255,235,210,0.1);
+    color: #e4defc;
+    background: rgba(255,255,255,0.07);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.14);
     padding: 0.35rem 0.85rem;
     border-radius: 999px;
+    transition: all 0.2s ease;
 }
+.gt-badge:hover { background: rgba(255,255,255,0.12); transform: translateY(-1px); }
 
 /* How it works */
 .gt-steps {
     display: flex;
     align-items: stretch;
-    gap: 0.6rem;
+    gap: 0.8rem;
     margin-bottom: 1.6rem;
 }
 .gt-step {
     flex: 1;
-    background: linear-gradient(160deg, rgba(255,235,210,0.045), rgba(255,235,210,0.015));
-    border: 1px solid rgba(255,235,210,0.09);
-    border-radius: 16px;
-    padding: 1.2rem 1.3rem;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    background: rgba(255,255,255,0.055);
+    backdrop-filter: blur(24px) saturate(150%);
+    -webkit-backdrop-filter: blur(24px) saturate(150%);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 18px;
+    padding: 1.3rem 1.4rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.08);
+    transition: all 0.25s cubic-bezier(0.16,1,0.3,1);
 }
+.gt-step:hover { transform: translateY(-4px); border-color: rgba(255,255,255,0.26); box-shadow: 0 14px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.12); }
 .gt-step-icon {
-    width: 40px; height: 40px;
+    width: 42px; height: 42px;
     display: flex; align-items: center; justify-content: center;
-    border-radius: 11px;
-    font-size: 1.2rem;
+    border-radius: 12px;
+    font-size: 1.25rem;
     margin-bottom: 0.7rem;
     background: linear-gradient(135deg, var(--c1), var(--c2));
-    box-shadow: 0 4px 14px color-mix(in srgb, var(--c1) 45%, transparent);
+    box-shadow: 0 4px 16px color-mix(in srgb, var(--c1) 50%, transparent);
 }
-.gt-step-title { font-weight: 700; font-size: 0.98rem; color: #f0ebe4; margin-bottom: 0.3rem; }
-.gt-step-desc { font-size: 0.85rem; color: #a89e91; line-height: 1.5; }
-.gt-arrow { display: flex; align-items: center; color: #4a4237; font-size: 1.3rem; padding: 0 0.1rem; }
+.gt-step-title { font-weight: 700; font-size: 0.98rem; color: #f5f2fb; margin-bottom: 0.3rem; }
+.gt-step-desc { font-size: 0.85rem; color: #b3a9c4; line-height: 1.5; }
+.gt-arrow { display: flex; align-items: center; color: #6b5f80; font-size: 1.4rem; padding: 0 0.15rem; }
 @media (max-width: 900px) { .gt-steps { flex-direction: column; } .gt-arrow { display: none; } }
 
-/* Cards */
-.gt-card {
-    background: linear-gradient(160deg, rgba(255,235,210,0.035), rgba(255,235,210,0.01)), #1c1712;
-    border: 1px solid rgba(255,235,210,0.09);
-    border-radius: 16px;
+/* Glass cards */
+.gt-card, div[data-testid="stVerticalBlockBorderWrapper"]:has(textarea) {
+    background: rgba(255,255,255,0.055) !important;
+    backdrop-filter: blur(24px) saturate(150%);
+    -webkit-backdrop-filter: blur(24px) saturate(150%);
+    border: 1px solid rgba(255,255,255,0.14) !important;
+    border-radius: 20px !important;
     padding: 1.5rem 1.7rem;
     margin-bottom: 1.3rem;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    box-shadow: 0 10px 36px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.08);
 }
 .gt-section-title {
     font-size: 1.08rem;
     font-weight: 700;
     margin-bottom: 0.3rem;
-    color: #f0ebe4;
+    color: #f5f2fb;
     display: flex;
     align-items: center;
     gap: 0.5rem;
 }
 
-/* Annotated text */
+/* Annotated text — slightly more opaque so claim-status colors stay crisp */
 .gt-annotated {
     font-size: 1.08rem;
     line-height: 2.15;
-    background: rgba(0,0,0,0.22);
-    border: 1px solid rgba(255,235,210,0.06);
-    border-radius: 12px;
+    background: rgba(10,7,16,0.45);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
     padding: 1.2rem 1.4rem;
 }
 .gt-annotated .gt-claim {
@@ -150,7 +175,7 @@ html, body, [class*="css"] {
 
 /* Legend chips */
 .gt-legend { display: flex; gap: 1.1rem; flex-wrap: wrap; margin-bottom: 1rem; }
-.gt-legend-item { display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; color: #a89e91; }
+.gt-legend-item { display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; color: #b3a9c4; }
 .gt-legend-dot {
     width: 10px; height: 10px; border-radius: 50%; display: inline-block;
     box-shadow: 0 0 8px 1px var(--dot-glow, transparent);
@@ -161,83 +186,104 @@ html, body, [class*="css"] {
 .gt-stat {
     position: relative;
     overflow: hidden;
-    background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 14%, #150f0a), #150f0a 55%);
-    border: 1px solid rgba(255,235,210,0.08);
-    border-radius: 13px;
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 14px;
     padding: 1rem 1.1rem;
-    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    transition: transform 0.2s cubic-bezier(0.16,1,0.3,1), box-shadow 0.2s ease, border-color 0.2s ease;
 }
-.gt-stat:hover { transform: translateY(-3px); box-shadow: 0 10px 24px color-mix(in srgb, var(--accent) 30%, transparent); }
+.gt-stat:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 14px 30px color-mix(in srgb, var(--accent) 35%, transparent); border-color: color-mix(in srgb, var(--accent) 50%, transparent); }
 .gt-stat::before {
     content: "";
     position: absolute; top: 0; left: 0; right: 0; height: 3px;
-    background: var(--accent, #f59e0b);
+    background: var(--accent, #8b5cf6);
 }
-.gt-stat-value { font-size: 1.75rem; font-weight: 800; color: var(--accent, #f0ebe4); line-height: 1.1; }
-.gt-stat-label { font-size: 0.78rem; color: #a89e91; margin-top: 0.3rem; font-weight: 500; }
+.gt-stat-value { font-size: 1.75rem; font-weight: 800; color: var(--accent, #f5f2fb); line-height: 1.1; }
+.gt-stat-label { font-size: 0.78rem; color: #b3a9c4; margin-top: 0.3rem; font-weight: 500; }
 @media (max-width: 900px) { .gt-stats { grid-template-columns: repeat(2, 1fr); } }
 
 /* Buttons */
 div[data-testid="stButton"] button[kind="secondary"] {
     border-radius: 999px;
-    border: 1px solid rgba(255,235,210,0.12);
-    background: rgba(255,235,210,0.04);
-    transition: all 0.15s ease;
+    border: 1px solid rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.06);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    color: #e4defc;
+    transition: all 0.2s cubic-bezier(0.16,1,0.3,1);
 }
 div[data-testid="stButton"] button[kind="secondary"]:hover {
-    border-color: #f59e0b;
-    color: #fbbf24;
-    background: rgba(245,158,11,0.12);
-    transform: translateY(-1px);
+    border-color: rgba(216,180,254,0.5);
+    background: rgba(139,92,246,0.18);
+    color: #f0e6ff;
+    transform: translateY(-2px);
 }
+div[data-testid="stButton"] button[kind="secondary"]:active { transform: translateY(0) scale(0.97); }
+
 div[data-testid="stButton"] button[kind="primary"] {
-    border-radius: 10px;
+    border-radius: 12px;
     font-weight: 700;
-    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    background: linear-gradient(135deg, #7c3aed, #6366f1);
     border: none;
-    box-shadow: 0 6px 20px rgba(245,158,11,0.35);
-    transition: all 0.15s ease;
+    box-shadow: 0 8px 26px rgba(124,58,237,0.45);
+    transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1);
 }
 div[data-testid="stButton"] button[kind="primary"] p,
 div[data-testid="stButton"] button[kind="primary"] div {
-    color: #1a1305 !important;
+    color: #ffffff !important;
 }
 div[data-testid="stButton"] button[kind="primary"]:disabled {
-    background: rgba(255,235,210,0.06);
+    background: rgba(255,255,255,0.06);
     box-shadow: none;
 }
 div[data-testid="stButton"] button[kind="primary"]:disabled p,
 div[data-testid="stButton"] button[kind="primary"]:disabled div {
-    color: #6b6255 !important;
+    color: #6b6480 !important;
 }
 div[data-testid="stButton"] button[kind="primary"]:not(:disabled):hover {
-    transform: translateY(-1px);
-    box-shadow: 0 8px 26px rgba(245,158,11,0.5);
+    transform: translateY(-2px) scale(1.015);
+    box-shadow: 0 14px 34px rgba(124,58,237,0.6);
+}
+div[data-testid="stButton"] button[kind="primary"]:not(:disabled):active {
+    transform: translateY(0) scale(0.98);
 }
 
-/* Input card focus glow */
-div[data-testid="stVerticalBlockBorderWrapper"]:has(textarea) {
-    box-shadow: 0 12px 34px rgba(0,0,0,0.35);
+/* Input focus glow */
+div[data-testid="stVerticalBlockBorderWrapper"]:has(textarea):focus-within {
+    border-color: rgba(216,180,254,0.5) !important;
+    box-shadow: 0 12px 36px rgba(0,0,0,0.4), 0 0 0 3px rgba(139,92,246,0.25) !important;
 }
-textarea:focus {
-    box-shadow: 0 0 0 2px rgba(245,158,11,0.4) !important;
-}
+textarea { transition: all 0.2s ease; }
 
-/* Expanders as claim cards */
+/* Expanders as glass claim cards */
 div[data-testid="stExpander"] {
-    border-radius: 12px !important;
-    border: 1px solid rgba(255,235,210,0.09) !important;
+    border-radius: 14px !important;
+    border: 1px solid rgba(255,255,255,0.12) !important;
+    background: rgba(255,255,255,0.04) !important;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     margin-bottom: 0.6rem;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.22);
+    box-shadow: 0 8px 22px rgba(0,0,0,0.28);
+    transition: border-color 0.2s ease;
 }
+div[data-testid="stExpander"]:hover { border-color: rgba(216,180,254,0.35) !important; }
 
-.gt-footer { color: #7a7166; font-size: 0.82rem; line-height: 1.6; }
+.gt-footer { color: #9089a3; font-size: 0.82rem; line-height: 1.6; }
 </style>
 """
 st.markdown(_CSS, unsafe_allow_html=True)
 
 st.markdown(
     """
+<div class="gt-blob-layer">
+    <div class="gt-blob gt-blob-1"></div>
+    <div class="gt-blob gt-blob-2"></div>
+    <div class="gt-blob gt-blob-3"></div>
+    <div class="gt-blob gt-blob-4"></div>
+</div>
+<div class="gt-anim-1">
 <div class="gt-eyebrow">⚡ ADVERSARIAL FACT AUDITOR</div>
 <div class="gt-title">Ground Truth</div>
 <div class="gt-sub">Two AI agents argue for and against every claim in your text — a prosecutor
@@ -250,21 +296,22 @@ with real citations and an honest dissenting view.
     <span class="gt-badge">🔍 Live web search</span>
     <span class="gt-badge">🆓 Zero paid APIs</span>
 </div>
-<div class="gt-steps">
+</div>
+<div class="gt-steps gt-anim-2">
     <div class="gt-step">
-        <div class="gt-step-icon" style="--c1:#f59e0b;--c2:#fbbf24;">✂️</div>
+        <div class="gt-step-icon" style="--c1:#8b5cf6;--c2:#c4b5fd;">✂️</div>
         <div class="gt-step-title">1. Extract claims</div>
         <div class="gt-step-desc">Splits your text into atomic, checkable statements — skipping opinions and predictions.</div>
     </div>
     <div class="gt-arrow">→</div>
     <div class="gt-step">
-        <div class="gt-step-icon" style="--c1:#e11d48;--c2:#d97706;">⚔️</div>
+        <div class="gt-step-icon" style="--c1:#ec4899;--c2:#f472b6;">⚔️</div>
         <div class="gt-step-title">2. Adversarial debate</div>
         <div class="gt-step-desc">A prosecutor and defender independently search the web and build opposing briefs.</div>
     </div>
     <div class="gt-arrow">→</div>
     <div class="gt-step">
-        <div class="gt-step-icon" style="--c1:#7c3aed;--c2:#a78bfa;">⚖️</div>
+        <div class="gt-step-icon" style="--c1:#f59e0b;--c2:#fbbf24;">⚖️</div>
         <div class="gt-step-title">3. Judge verdict</div>
         <div class="gt-step-desc">Weighs both briefs on evidence quality and always states the losing side's best point.</div>
     </div>
@@ -338,7 +385,7 @@ if result is not None:
     counts = summary["label_counts"]
     stats_html = f"""
     <div class="gt-stats">
-      <div class="gt-stat" style="--accent:#fbbf24"><div class="gt-stat-value">{score_display}</div><div class="gt-stat-label">📊 Truthfulness score</div></div>
+      <div class="gt-stat" style="--accent:#c4b5fd"><div class="gt-stat-value">{score_display}</div><div class="gt-stat-label">📊 Truthfulness score</div></div>
       <div class="gt-stat" style="--accent:{LABEL_COLORS['supported']}"><div class="gt-stat-value">{counts['supported']}</div><div class="gt-stat-label">🟢 Supported</div></div>
       <div class="gt-stat" style="--accent:{LABEL_COLORS['disputed']}"><div class="gt-stat-value">{counts['disputed']}</div><div class="gt-stat-label">🟡 Disputed</div></div>
       <div class="gt-stat" style="--accent:{LABEL_COLORS['contradicted']}"><div class="gt-stat-value">{counts['contradicted']}</div><div class="gt-stat-label">🔴 Contradicted</div></div>
@@ -362,7 +409,7 @@ if result is not None:
                 ),
                 text=[f"{v.confidence}" for v in verdicts_sorted],
                 textposition="outside",
-                textfont=dict(color="#f0ebe4"),
+                textfont=dict(color="#f5f2fb"),
                 customdata=[v.label for v in verdicts_sorted],
                 hovertemplate="<b>%{y}</b><br>%{customdata} — %{x}/100<extra></extra>",
             )
@@ -370,12 +417,12 @@ if result is not None:
         fig.update_layout(
             paper_bgcolor="rgba(0,0,0,0)",
             plot_bgcolor="rgba(0,0,0,0)",
-            font=dict(family="Inter, sans-serif", color="#a89e91", size=13),
+            font=dict(family="Inter, sans-serif", color="#b3a9c4", size=13),
             xaxis=dict(
                 title="Confidence (0-100)",
                 range=[0, 108],
-                gridcolor="rgba(255,235,210,0.08)",
-                zerolinecolor="rgba(255,235,210,0.08)",
+                gridcolor="rgba(255,255,255,0.1)",
+                zerolinecolor="rgba(255,255,255,0.1)",
             ),
             yaxis=dict(title=None, gridcolor="rgba(0,0,0,0)"),
             bargap=0.4,
@@ -424,7 +471,7 @@ if result is not None:
 
 st.markdown(
     """
-<div class="gt-footer" style="margin-top:2rem; padding-top:1rem; border-top:1px solid rgba(255,235,210,0.08);">
+<div class="gt-footer" style="margin-top:2rem; padding-top:1rem; border-top:1px solid rgba(255,255,255,0.1);">
 ⚠️ This is an AI-assisted research aid. Scores are model judgments over web search results,
 not ground truth, and this tool is not a substitute for human fact-checking.
 </div>
